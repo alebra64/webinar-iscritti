@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Iscritti al Webinar</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 20px;
+        }}
+        .logo {{
+            width: 300px;
+            margin-bottom: 20px;
+        }}
+        table {{
+            margin: auto;
+            border-collapse: collapse;
+            width: 80%;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }}
+        th, td {{
+            border: 1px solid #ddd;
+            padding: 12px;
+        }}
+        th {{
+            background-color: #f04e23;
+            color: white;
+        }}
+        .login {{
+            margin-bottom: 20px;
+        }}
+    </style>
+</head>
+<body>
+    <img src="fast-video-logo.jpg" alt="Fast Video Produzioni" class="logo">
+    <div class="login">
+        <label for="password">Password: </label>
+        <input type="password" id="password">
+        <button onclick="checkPassword()">Accedi</button>
+    </div>
+    <div id="content" style="display:none;">
+        <h2>Iscritti al Webinar</h2>
+        <table>
+            <tr><th>Nome</th><th>Cognome</th><th>Email</th><th>Link personale</th></tr>
+            <tr><td>Mario</td><td>Rossi</td><td>mario.rossi@example.com</td><td>https://zoom.us/w/123456</td></tr>
+            <tr><td>Lucia</td><td>Bianchi</td><td>lucia.bianchi@example.com</td><td>https://zoom.us/w/789012</td></tr>
+        </table>
+    </div>
+    <script>
+        function checkPassword() {{
+            var pwd = document.getElementById("password").value;
+            if(pwd === "fv2025") {{
+                document.querySelector(".login").style.display = "none";
+                document.getElementById("content").style.display = "block";
+            }} else {{
+                alert("Password errata.");
+            }}
+        }}
+    </script>
+</body>
+</html>
