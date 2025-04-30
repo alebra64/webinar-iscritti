@@ -1,67 +1,146 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>Iscritti al Webinar</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            text-align: center;
-            padding: 20px;
-        }
-        .logo {
-            max-width: 280px;
-            height: auto;
-            margin: 0 auto 20px;
-            display: block;
-        }
-        .login {
-            margin-bottom: 20px;
-        }
-        table {
-            margin: auto;
-            border-collapse: collapse;
-            width: 90%;
-            max-width: 800px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            font-size: 16px;
-        }
-        th {
-            background-color: #f04e23;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Monitoraggio Iscritti</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    img {
+      max-width: 300px;
+      margin-bottom: 2rem;
+    }
+
+    input[type="password"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      max-width: 700px;
+      margin: 2rem auto;
+      border-collapse: collapse;
+      background-color: white;
+    }
+
+    th, td {
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    .error {
+      color: red;
+      margin-top: 1rem;
+    }
+  </style>
 </head>
 <body>
-    <img src="fast-video-logo.jpg" alt="Fast Video Produzioni" class="logo">
-    <div class="login">
-        <label for="password">Password: </label>
-        <input type="password" id="password">
-        <button onclick="checkPassword()">Accedi</button>
-    </div>
-    <div id="content" style="display:none;">
-        <h2>Iscritti al Webinar</h2>
-        <table>
-            <tr><th>Nome</th><th>Cognome</th><th>Email</th><th>Link personale</th></tr>
-            <tr><td>Mario</td><td>Rossi</td><td>mario.rossi@example.com</td><td>https://zoom.us/w/123456</td></tr>
-            <tr><td>Lucia</td><td>Bianchi</td><td>lucia.bianchi@example.com</td><td>https://zoom.us/w/789012</td></tr>
-        </table>
-    </div>
-    <script>
-        function checkPassword() {
-            var pwd = document.getElementById("password").value;
-            if(pwd === "fv2025") {
-                document.querySelector(".login").style.display = "none";
-                document.getElementById("content").style.display = "block";
-            } else {
-                alert("Password errata.");
+
+  <img src="logo.jpg" alt="Fast Video Produzioni Logo">
+  <h2>🔒 Accesso protetto</h2>
+
+  <div id="login">
+    <input type="password" id="password" placeholder="Inserisci la password">
+    <br>
+    <button onclick="checkPassword()">Accedi</button>
+    <p class="error" id="errorMsg" style="display: none;">Password errata</p>
+  </div>
+
+  <div id="registrantsSection" class="hidden">
+    <h2>📋 Iscritti al Webinar</h2>
+    <table id="registrantsTable">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Cognome</th>
+          <th>Email</th>
+          <th>Link personale</th>
+        </tr>
+      </thead>
+      <tbody id="registrantsBody">
+        <!-- Dati generati dinamicamente -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const PASSWORD_CORRETTA = "fv2025";
+    const BACKEND_URL = "https://zoom-backend-la4b.onrender.com";
+
+    function checkPassword() {
+      const passwordInput = document.getElementById("password").value;
+      const errorMsg = document.getElementById("errorMsg");
+      if (passwordInput === PASSWORD_CORRETTA) {
+        document.getElementById("login").style.display = "none";
+        const urlParams = new URLSearchParams(window.location.search);
+        const webinarId = urlParams.get("id");
+
+        if (!webinarId) {
+          alert("⚠️ Devi aggiungere l'ID del webinar nell'URL (es: ?id=123456789)");
+          return;
+        }
+
+        fetch(`${BACKEND_URL}/registrants?webinar_id=${webinarId}`)
+          .then(res => {
+            if (!res.ok) {
+              throw new Error("Errore nel recupero dei dati");
             }
+            return res.json();
+          })
+          .then(data => {
+            document.getElementById("registrantsSection").classList.remove("hidden");
+            const tbody = document.getElementById("registrantsBody");
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+              tbody.innerHTML = "<tr><td colspan='4'>Nessun iscritto trovato</td></tr>";
+              return;
+            }
+
+            data.forEach(r => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td>${r.first_name || ""}</td>
+                <td>${r.last_name || ""}</td>
+                <td>${r.email || ""}</td>
+                <td><a href="${r.join_url}" target="_blank">Apri</a></td>
+              `;
+              tbody.appendChild(row);
+            });
+          })
+          .catch(() => {
+            alert("Errore nel recupero dei dati dal backend");
+          });
+
+      } else {
+        errorMsg.style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
+
         }
     </script>
 </body>
