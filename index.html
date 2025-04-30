@@ -3,64 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Monitoraggio Iscritti</title>
+  <title>Monitoraggio Iscritti Webinar</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 2rem;
+      color: #333;
+    }
+    header {
       text-align: center;
-      margin-top: 40px;
+      margin-bottom: 2rem;
     }
     img {
-      max-width: 300px;
-      margin-bottom: 20px;
+      max-width: 200px;
+      margin-bottom: 1rem;
     }
-    .lock {
-      font-size: 1.4rem;
-      margin-bottom: 10px;
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
     }
-    input[type="password"] {
-      padding: 8px;
-      width: 250px;
-      font-size: 1rem;
+    .login {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0 1rem 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      font-size: 1rem;
+      background-color: #0073e6;
+      color: white;
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
-    }
-    .error {
-      color: red;
-      margin-top: 10px;
+      width: 100%;
     }
     table {
-      margin: 0 auto;
+      width: 100%;
+      margin-top: 2rem;
       border-collapse: collapse;
-      margin-top: 20px;
     }
     th, td {
-      border: 1px solid #ccc;
-      padding: 8px 12px;
+      padding: 0.75rem;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
     }
     th {
-      background-color: #f2f2f2;
+      background-color: #f0f0f0;
+    }
+    .hidden {
+      display: none;
+    }
+    a {
+      color: #0073e6;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <img src="fast-video-logo.jpg" alt="Fast Video Produzioni Logo" />
+  <header>
+    <img src="fast-video-nero_page-0001.jpg" alt="Logo Fast Video Produzioni" />
+    <h1>Monitoraggio Iscritti Webinar</h1>
+  </header>
 
-  <div id="login-section">
-    <div class="lock">🔒 <strong>Accesso protetto</strong></div>
-    <input type="password" id="password" placeholder="Inserisci la password" />
-    <br />
+  <div class="login" id="loginBox">
+    <input type="password" id="password" placeholder="Inserisci la password di accesso" />
     <button onclick="checkPassword()">Accedi</button>
-    <div class="error" id="error-message"></div>
   </div>
 
-  <div id="table-section" style="display:none;">
-    <h2>Elenco Iscritti</h2>
-    <table id="registrants-table">
+  <div id="tableBox" class="hidden">
+    <table>
       <thead>
         <tr>
           <th>Nome</th>
@@ -69,67 +91,51 @@
           <th>Link personale</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="registrantsTable"></tbody>
     </table>
   </div>
 
   <script>
-    const PASSWORD = "fast2024";  // Puoi cambiarla se serve
-    const backendUrl = "https://zoom-backend-la4b.onrender.com";
-
-    function getWebinarId() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("id");
-    }
+    const PASSWORD = "fastvideo";
+    const webinarId = new URLSearchParams(window.location.search).get("id");
 
     function checkPassword() {
       const input = document.getElementById("password").value;
-      const errorDiv = document.getElementById("error-message");
-      if (input !== PASSWORD) {
-        errorDiv.textContent = "Password errata.";
-        return;
+      if (input === PASSWORD) {
+        document.getElementById("loginBox").classList.add("hidden");
+        if (!webinarId) {
+          alert("⚠️ ID del webinar mancante nell'URL.");
+          return;
+        }
+        fetchData();
+      } else {
+        alert("❌ Password errata.");
       }
-
-      const webinarId = getWebinarId();
-      if (!webinarId) {
-        errorDiv.textContent = "ID del webinar mancante nell’URL.";
-        return;
-      }
-
-      document.getElementById("login-section").style.display = "none";
-      document.getElementById("table-section").style.display = "block";
-      fetchRegistrants(webinarId);
     }
 
-    function fetchRegistrants(webinarId) {
-      fetch(`${backendUrl}/registrants?webinar_id=${webinarId}`)
-        .then(response => {
-          if (!response.ok) throw new Error("Errore nel recupero dei dati dal backend.");
-          return response.json();
-        })
-        .then(data => {
-          const tbody = document.querySelector("#registrants-table tbody");
-          tbody.innerHTML = "";
-          data.forEach(person => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-              <td>${person.first_name}</td>
-              <td>${person.last_name}</td>
-              <td>${person.email}</td>
-              <td><a href="${person.join_url}" target="_blank">Vai al link</a></td>
-            `;
-            tbody.appendChild(row);
-          });
-        })
-        .catch(error => {
-          const errorDiv = document.getElementById("error-message");
-          errorDiv.textContent = error.message;
+    async function fetchData() {
+      try {
+        const res = await fetch(`https://zoom-backend-la4b.onrender.com/registrants?webinar_id=${webinarId}`);
+        const data = await res.json();
+        const table = document.getElementById("registrantsTable");
+
+        data.forEach(p => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${p.first_name || ""}</td>
+            <td>${p.last_name || ""}</td>
+            <td>${p.email}</td>
+            <td><a href="${p.join_url}" target="_blank">Vai al link</a></td>
+          `;
+          table.appendChild(row);
         });
+
+        document.getElementById("tableBox").classList.remove("hidden");
+      } catch (err) {
+        alert("Errore nel recupero dei dati dal backend.");
+        console.error(err);
+      }
     }
   </script>
-</body>
-</html>
-
-    </script>
 </body>
 </html>
