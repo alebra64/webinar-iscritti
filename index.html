@@ -4,34 +4,38 @@
     <meta charset="UTF-8">
     <title>Iscritti al Webinar</title>
     <style>
-        body {{
+        body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
             text-align: center;
             padding: 20px;
-        }}
-        .logo {{
-            width: 300px;
+        }
+        .logo {
+            max-width: 280px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+        }
+        .login {
             margin-bottom: 20px;
-        }}
-        table {{
+        }
+        table {
             margin: auto;
             border-collapse: collapse;
-            width: 80%;
+            width: 90%;
+            max-width: 800px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }}
-        th, td {{
+        }
+        th, td {
             border: 1px solid #ddd;
             padding: 12px;
-        }}
-        th {{
+            font-size: 16px;
+        }
+        th {
             background-color: #f04e23;
             color: white;
-        }}
-        .login {{
-            margin-bottom: 20px;
-        }}
+        }
     </style>
 </head>
 <body>
@@ -50,15 +54,15 @@
         </table>
     </div>
     <script>
-        function checkPassword() {{
+        function checkPassword() {
             var pwd = document.getElementById("password").value;
-            if(pwd === "fv2025") {{
+            if(pwd === "fv2025") {
                 document.querySelector(".login").style.display = "none";
                 document.getElementById("content").style.display = "block";
-            }} else {{
+            } else {
                 alert("Password errata.");
-            }}
-        }}
+            }
+        }
     </script>
 </body>
 </html>
