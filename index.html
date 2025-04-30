@@ -1,75 +1,66 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Monitoraggio Iscritti</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
       text-align: center;
-      padding: 2rem;
+      margin-top: 40px;
     }
-
     img {
       max-width: 300px;
-      margin-bottom: 2rem;
+      margin-bottom: 20px;
     }
-
+    .lock {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
     input[type="password"] {
-      padding: 0.5rem;
+      padding: 8px;
+      width: 250px;
       font-size: 1rem;
-      margin-bottom: 1rem;
     }
-
     button {
-      padding: 0.5rem 1rem;
+      margin-top: 10px;
+      padding: 8px 16px;
       font-size: 1rem;
       cursor: pointer;
     }
-
-    .hidden {
-      display: none;
-    }
-
-    table {
-      width: 100%;
-      max-width: 700px;
-      margin: 2rem auto;
-      border-collapse: collapse;
-      background-color: white;
-    }
-
-    th, td {
-      padding: 0.8rem;
-      border: 1px solid #ddd;
-    }
-
-    th {
-      background-color: #f0f0f0;
-    }
-
     .error {
       color: red;
-      margin-top: 1rem;
+      margin-top: 10px;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+    }
+    th {
+      background-color: #f2f2f2;
     }
   </style>
 </head>
 <body>
+  <img src="fast-video-logo.jpg" alt="Fast Video Produzioni Logo" />
 
-  <img src="logo.jpg" alt="Fast Video Produzioni Logo">
-  <h2>🔒 Accesso protetto</h2>
-
-  <div id="login">
-    <input type="password" id="password" placeholder="Inserisci la password">
-    <br>
+  <div id="login-section">
+    <div class="lock">🔒 <strong>Accesso protetto</strong></div>
+    <input type="password" id="password" placeholder="Inserisci la password" />
+    <br />
     <button onclick="checkPassword()">Accedi</button>
-    <p class="error" id="errorMsg" style="display: none;">Password errata</p>
+    <div class="error" id="error-message"></div>
   </div>
 
-  <div id="registrantsSection" class="hidden">
-    <h2>📋 Iscritti al Webinar</h2>
-    <table id="registrantsTable">
+  <div id="table-section" style="display:none;">
+    <h2>Elenco Iscritti</h2>
+    <table id="registrants-table">
       <thead>
         <tr>
           <th>Nome</th>
@@ -78,70 +69,67 @@
           <th>Link personale</th>
         </tr>
       </thead>
-      <tbody id="registrantsBody">
-        <!-- Dati generati dinamicamente -->
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 
   <script>
-    const PASSWORD_CORRETTA = "fv2025";
-    const BACKEND_URL = "https://zoom-backend-la4b.onrender.com";
+    const PASSWORD = "fast2024";  // Puoi cambiarla se serve
+    const backendUrl = "https://zoom-backend-la4b.onrender.com";
+
+    function getWebinarId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("id");
+    }
 
     function checkPassword() {
-      const passwordInput = document.getElementById("password").value;
-      const errorMsg = document.getElementById("errorMsg");
-      if (passwordInput === PASSWORD_CORRETTA) {
-        document.getElementById("login").style.display = "none";
-        const urlParams = new URLSearchParams(window.location.search);
-        const webinarId = urlParams.get("id");
-
-        if (!webinarId) {
-          alert("⚠️ Devi aggiungere l'ID del webinar nell'URL (es: ?id=123456789)");
-          return;
-        }
-
-        fetch(`${BACKEND_URL}/registrants?webinar_id=${webinarId}`)
-          .then(res => {
-            if (!res.ok) {
-              throw new Error("Errore nel recupero dei dati");
-            }
-            return res.json();
-          })
-          .then(data => {
-            document.getElementById("registrantsSection").classList.remove("hidden");
-            const tbody = document.getElementById("registrantsBody");
-            tbody.innerHTML = "";
-
-            if (data.length === 0) {
-              tbody.innerHTML = "<tr><td colspan='4'>Nessun iscritto trovato</td></tr>";
-              return;
-            }
-
-            data.forEach(r => {
-              const row = document.createElement("tr");
-              row.innerHTML = `
-                <td>${r.first_name || ""}</td>
-                <td>${r.last_name || ""}</td>
-                <td>${r.email || ""}</td>
-                <td><a href="${r.join_url}" target="_blank">Apri</a></td>
-              `;
-              tbody.appendChild(row);
-            });
-          })
-          .catch(() => {
-            alert("Errore nel recupero dei dati dal backend");
-          });
-
-      } else {
-        errorMsg.style.display = "block";
+      const input = document.getElementById("password").value;
+      const errorDiv = document.getElementById("error-message");
+      if (input !== PASSWORD) {
+        errorDiv.textContent = "Password errata.";
+        return;
       }
+
+      const webinarId = getWebinarId();
+      if (!webinarId) {
+        errorDiv.textContent = "ID del webinar mancante nell’URL.";
+        return;
+      }
+
+      document.getElementById("login-section").style.display = "none";
+      document.getElementById("table-section").style.display = "block";
+      fetchRegistrants(webinarId);
+    }
+
+    function fetchRegistrants(webinarId) {
+      fetch(`${backendUrl}/registrants?webinar_id=${webinarId}`)
+        .then(response => {
+          if (!response.ok) throw new Error("Errore nel recupero dei dati dal backend.");
+          return response.json();
+        })
+        .then(data => {
+          const tbody = document.querySelector("#registrants-table tbody");
+          tbody.innerHTML = "";
+          data.forEach(person => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${person.first_name}</td>
+              <td>${person.last_name}</td>
+              <td>${person.email}</td>
+              <td><a href="${person.join_url}" target="_blank">Vai al link</a></td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(error => {
+          const errorDiv = document.getElementById("error-message");
+          errorDiv.textContent = error.message;
+        });
     }
   </script>
 </body>
 </html>
 
-        }
     </script>
 </body>
 </html>
