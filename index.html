@@ -61,6 +61,8 @@
             <tbody id="tableBody">
             </tbody>
         </table>
+        <p id="totalCount" style="font-weight: bold; margin-top: 10px;"></p>
+        
         <div class="error" id="fetchError"></div>
     </div>
 
@@ -109,7 +111,9 @@
                         <td><a href="${person.join_url}" target="_blank">Entra</a></td>
                     </tr>`;
                     tbody.innerHTML += row;
-                });
+                }); 
+                document.getElementById("totalCount").textContent = `Totale iscritti: ${data.length}`;
+
 
                 document.getElementById("registrantsTable").style.display = "block";
             } catch (error) {
